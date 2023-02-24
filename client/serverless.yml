@@ -1,0 +1,103 @@
+service: my-store-app
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  profile: Admin
+
+plugins:
+  - serverless-finch
+  - serverless-single-page-app-plugin
+  - serverless-cloudfront-invalidate
+
+custom:
+  s3LocalPath: ./dist
+  client:
+    bucketName: shop-react-redux-training-serverless
+    distributionFolder: ./dist
+    indexDocument: index.html
+    manageResources: false
+  cloudfrontInvalidate:
+    - distributionId: "E3EIXYHP6T9QJG" #conditional, distributionId or distributionIdKey is required.
+      distributionIdKey: "id" #conditional, distributionId or distributionIdKey is required.
+      autoInvalidate: true # Can be set to false to avoid automatic invalidation after the deployment. Useful if you want to manually trigger the invalidation later. Defaults to true.
+      items: # one or more paths required
+        - "/index.html"
+
+resources:
+  Resources:
+    WebAppS3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.client.bucketName}
+        AccessControl: PublicRead
+        WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: index.html
+
+    WebAppS3BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: WebAppS3Bucket
+        PolicyDocument:
+          Statement:
+            - Sid: 'AllowCloudFrontAccessIdentity'
+              Effect: Allow
+              Action: s3:GetObject
+              Resource: arn:aws:s3:::${self:custom.client.bucketName}/*
+              Principal:
+                AWS:
+                  Fn::Join:
+                    - ' '
+                    - - 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity'
+                      - !Ref OriginAccessIdentity
+
+    OriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: Access identity between CloudFront and S3 bucket
+
+    WebAppCloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Origins:
+            - DomainName: ${self:custom.client.bucketName}.s3.amazonaws.com
+              Id: myS3Origin
+              S3OriginConfig:
+                OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentity}
+          Enabled: 'true'
+          DefaultRootObject: index.html
+          IPV6Enabled: true
+          HttpVersion: http2
+          CustomErrorResponses:
+            - ErrorCode: 404
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+          DefaultCacheBehavior:
+            AllowedMethods: [ 'GET', 'HEAD', 'OPTIONS' ]
+            CachedMethods: [ 'GET', 'HEAD', 'OPTIONS' ]
+            TargetOriginId: myS3Origin
+            ForwardedValues:
+              Headers:
+                - Access-Control-Request-Headers
+                - Access-Control-Request-Method
+                - Origin
+                - Authorization
+              QueryString: false
+              Cookies:
+                Forward: none
+            ViewerProtocolPolicy: redirect-to-https
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: 'true'
+
+Outputs:
+  WebAppS3BucketOutput:
+    Value:
+      'Ref': WebAppS3Bucket
+  WebAppCloudFrontDistributionOutput:
+    Value:
+      'Fn::GetAtt': [ WebAppCloudFrontDistribution, DomainName ]
