@@ -8,8 +8,6 @@ const getProductsById = async (event: ValidatedAPIGatewayProxyEvent<null>) => {
   
   const mockProduct = mockProductData.find((p) => p.id === productId)
   if (!mockProduct) {
-    console.log(mockProduct)
-
     return formatJSONResponse({
       body: {
         error: `can not find product with id ${productId}`

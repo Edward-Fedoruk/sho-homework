@@ -1,8 +1,7 @@
-import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
 import { formatJSONResponse } from '@libs/api-gateway';
 import { mockProductData } from './mockProducts';
 
-const getProductsList: ValidatedEventAPIGatewayProxyEvent<undefined> = async () => {
+const getProductsList = async () => {
   
   return formatJSONResponse({
     products: mockProductData
