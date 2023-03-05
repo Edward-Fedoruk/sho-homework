@@ -24,6 +24,8 @@ const getProductsList = async () => {
       ...product
     }
   })
+  
+  console.log(joinedProducts)
 
   return formatJSONResponse({
     products: joinedProducts

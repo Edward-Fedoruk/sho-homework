@@ -5,6 +5,8 @@ import { Product } from 'src/types/product';
 import { Stock } from 'src/types/stock';
 
 const getProductsById = async (event: ValidatedAPIGatewayProxyEvent<null>) => {
+  console.log(event)
+
   const productId = event?.pathParameters?.productId;
   
   try {

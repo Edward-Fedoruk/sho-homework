@@ -2,6 +2,7 @@ import { Serverless } from 'serverless/aws';
 
 import products from '@functions/products';
 import product from '@functions/product';
+import createProduct from '@functions/create-product';
 
 const environment = {
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
@@ -61,7 +62,7 @@ const serverlessConfiguration: Serverless = {
     },
   },
   // import the function via paths
-  functions: { products, product },
+  functions: { products, product, createProduct },
   resources: {
     Resources: {
       ProductsTable: {

@@ -6,5 +6,5 @@ export const requestSchema = {
     price: {type: 'number' },
     count: {type: 'number' },
   },
-  require: ['title', 'description', 'price', 'count']
+  required: ['title', 'description', 'price', 'count']
 } as const;
