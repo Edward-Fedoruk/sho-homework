@@ -1,0 +1,10 @@
+{
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": {
+    "title": "title",
+    "price": 200,
+    "description": "string"
+  }
+}
