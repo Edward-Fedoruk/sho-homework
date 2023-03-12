@@ -10,8 +10,13 @@
     "node": ">=14.15.0"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.289.0",
+    "@aws-sdk/s3-presigned-post": "^3.289.0",
     "@middy/core": "^3.4.0",
-    "@middy/http-json-body-parser": "^3.4.0"
+    "@middy/http-cors": "^4.2.6",
+    "@middy/http-json-body-parser": "^3.4.0",
+    "@types/serverless": "^3.12.11",
+    "csv-parser": "^3.0.0"
   },
   "devDependencies": {
     "@serverless/typescript": "^3.0.0",
