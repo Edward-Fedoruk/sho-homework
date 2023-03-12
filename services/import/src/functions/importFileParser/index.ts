@@ -6,9 +6,10 @@ const handlerConfig: AwsFunctionHandler = {
   events: [
     {
       s3: {
-        bucket: process.env.BUCKET!,
+        bucket: 'shop-training-serverless-import',
         event: 's3LObjectCreate:*',
-        rules: [{ prefix: 'upload/' }]
+        rules: [{ prefix: 'upload/' }],
+        existing: true,
       },
     },
   ],

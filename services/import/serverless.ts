@@ -1,8 +1,9 @@
 import { Serverless } from 'serverless/aws';
 
 import importProductsFile from '@functions/importProductsFile';
+import importFileParser from '@functions/importFileParser';
 
-const s3Config = {
+export const s3Config = {
   bucketName: 'shop-training-serverless-import',
   folder: 'import'
 }
@@ -47,7 +48,7 @@ const serverlessConfiguration: Serverless = {
       },
     }
   },
-  functions: { importProductsFile },
+  functions: { importProductsFile, importFileParser },
   package: { individually: true },
   custom: {
     esbuild: {
