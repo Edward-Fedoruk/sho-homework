@@ -7,7 +7,7 @@ const handlerConfig: AwsFunctionHandler = {
     {
       s3: {
         bucket: 'shop-training-serverless-import',
-        event: 's3LObjectCreate:*',
+        event: 'S3:ObjectCreated:*',
         rules: [{ prefix: 'upload/' }],
         existing: true,
       },
