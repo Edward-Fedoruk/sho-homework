@@ -7,10 +7,13 @@ const s3 = new S3({ region: process.env.REGION })
 const importProductsFile = async (event: ValidatedAPIGatewayProxyEvent<{}>) => {
   const { name } = event.queryStringParameters as Record<string, string | undefined>;
 
+  console.log(`importing file ${name}`);
+
   const url = await s3.getSignedUrlPromise('putObject', {
     Bucket: process.env.BUCKET,
-    Key: `import/${name}`,
-    Expires: 60000
+    Key: `uploaded/${name}`,
+    Expires: 60000,
+    ContentType: 'text/csv'
   })
 
   return formatJSONResponse({

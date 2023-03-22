@@ -26,17 +26,31 @@ const serverlessConfiguration: Serverless = {
       REGION: 'us-east-1',
       BUCKET: s3Config.bucketName,
     },
-    iamRoleStatements: [
-      {
-        Effect: 'Allow',
-        Action: [
-          's3:GetObject',
-          's3:PutObject',
-          's3:GetObjectVersion',
-        ],
-        Resource: `arn:aws:s3:::${s3Config.bucketName}/*`,
-      },
-    ],
+    iam: {
+      role: {
+        statements: [
+          {
+            Effect: 'Allow',
+            Action: ['s3:ListBucket'],
+            Resource: `arn:aws:s3:::${s3Config.bucketName}`
+          },
+          {
+            Effect: 'Allow',
+            Action: ['s3:*'],
+            Resource: `arn:aws:s3:::${s3Config.bucketName}/*`
+          },
+          {
+            Effect: "Allow",
+            Action: [
+              "logs:PutLogEvents",
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream"
+            ],
+            Resource: `arn:aws:s3:::${s3Config.bucketName}/*`
+          },
+        ]
+      }
+    },
   },
   resources: {
     Resources: {
@@ -44,6 +58,22 @@ const serverlessConfiguration: Serverless = {
         Type: 'AWS::S3::Bucket',
         Properties: {
           BucketName: s3Config.bucketName,
+          CorsConfiguration: {
+            CorsRules: [
+              {
+                AllowedOrigins: ['*'],
+                AllowedMethods: [
+                  'GET',
+                  'PUT',
+                  'POST',
+                  'DELETE',
+                  'HEAD',
+                ],
+                AllowedHeaders: ['Content-Type'],
+                MaxAge: 3600
+              }
+            ]
+          }
         }
       },
     }
