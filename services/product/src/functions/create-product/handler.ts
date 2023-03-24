@@ -1,9 +1,9 @@
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
 import { formatJSONResponse } from '@libs/api-gateway';
 import { middyfy } from '@libs/lambda';
-import { dynamodb } from '@libs/dynamo';
 import {requestSchema} from './schema'
 import { v4 as uuidv4 } from 'uuid';
+import { createProductItem } from 'src/common/create-product-item';
 
 const createProduct: ValidatedEventAPIGatewayProxyEvent<typeof requestSchema> = async (event) => {
   console.log(event)
@@ -11,31 +11,13 @@ const createProduct: ValidatedEventAPIGatewayProxyEvent<typeof requestSchema> = 
   const { body } = event;
   const id = uuidv4();
   try {
-    await dynamodb.transactWriteItems({
-      TransactItems: [
-        {
-          Put: {
-            TableName: process.env.PRODUCTS_TABLE_NAME,
-            Item: {
-              id: { S: id },
-              title: { S: body.title },
-              description: { S: body.description },
-              price: { N: `${body.price}` },
-            }
-          }
-        },
-        {
-          Put: {
-            TableName: process.env.STOCKS_TABLE_NAME,
-            Item: {
-              product_id: { S: id },
-              count: { N: `${body.count}` },
-            }
-          }
-        }
-      ]
-    }).promise()
-    
+    await createProductItem({ 
+      count: body.count, 
+      description: body.description, 
+      price: body.price, 
+      title: body.title 
+    })
+
     return formatJSONResponse({
       message: 'item added'
     })

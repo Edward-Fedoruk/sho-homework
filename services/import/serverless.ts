@@ -48,6 +48,13 @@ const serverlessConfiguration: Serverless = {
             ],
             Resource: `arn:aws:s3:::${s3Config.bucketName}/*`
           },
+          {
+            Effect: 'Allow',
+            Action: [
+              'sqs:*',
+            ],
+            Resource: `arn:aws:sqs:*:*:catalogItemsQueue`,
+          },
         ]
       }
     },
