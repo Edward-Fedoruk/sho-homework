@@ -3,6 +3,7 @@ import { Serverless } from 'serverless/aws';
 import products from '@functions/products';
 import product from '@functions/product';
 import createProduct from '@functions/create-product';
+import catalogBatchProcess from '@functions/catalog-batch-process';
 
 const environment = {
   AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
@@ -10,7 +11,10 @@ const environment = {
   PRODUCTS_TABLE_NAME: 'products',
   STOCKS_TABLE_NAME: 'stocks',
   REGION: 'us-east-1',
-  NODE_ENV: 'production'
+  NODE_ENV: 'production',
+  CATALOG_QUEUE_NAME: 'catalogItemsQueue',
+  TOPIC_NAME: 'createProductTopic',
+  TOPIC_ARN: { "Ref": "CreateProductTopic" },
 }
 
 const serverlessConfiguration: Serverless = {
@@ -40,6 +44,20 @@ const serverlessConfiguration: Serverless = {
         ],
         Resource: 'arn:aws:dynamodb:*:*:*',
       },
+      {
+        Effect: 'Allow',
+        Action: [
+          'sqs:*',
+        ],
+        Resource: `arn:aws:sqs:*:*:${environment.CATALOG_QUEUE_NAME}`,
+      },
+      {
+        Effect: 'Allow',
+        Action: [
+          'sns:*',
+        ],
+        Resource: { "Ref": "CreateProductTopic" },
+      },
     ],
   },
   custom: {
@@ -62,7 +80,7 @@ const serverlessConfiguration: Serverless = {
     },
   },
   // import the function via paths
-  functions: { products, product, createProduct },
+  functions: { products, product, createProduct, catalogBatchProcess },
   resources: {
     Resources: {
       ProductsTable: {
@@ -95,6 +113,26 @@ const serverlessConfiguration: Serverless = {
             ReadCapacityUnits: 1,
             WriteCapacityUnits: 1
           }
+        }
+      },
+      CatalogItemsQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: environment.CATALOG_QUEUE_NAME,
+        }
+      },
+      CreateProductTopic: {
+        Type: 'AWS::SNS::Topic',
+        Properties: {
+          TopicName: 'createProductTopic',
+        }
+      },
+      CreateProductTopicSubscription: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Protocol: 'email',
+          Endpoint: 'ed.fedorukk@gmail.com',
+          TopicArn: { "Ref": "CreateProductTopic" }
         }
       }
     }
