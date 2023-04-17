@@ -6,7 +6,8 @@ plugins:
 provider:
   name: aws
   runtime: nodejs14.x
-
+  profile: Admin
+  
 functions:
   main:
     handler: dist/main.handler
